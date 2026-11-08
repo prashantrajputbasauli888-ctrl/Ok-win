@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HON-WIN Color Game</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101525;color:white;
+ font-family:Arial;text-align:center;
+}
+header{
+ background:#202b45;padding:20px;
+ font-size:25px;font-weight:bold;
+}
+.wallet{
+ margin:20px 15px;padding:20px;
+ background:#263653;border-radius:15px;
+}
+.coins{font-size:30px;color:#ffd34e;font-weight:bold}
+.timer{font-size:40px;margin:20px;color:#ffd34e}
+.colors{
+ display:flex;gap:10px;padding:15px;
+}
+.colors button{flex:1;padding:22px 5px}
+button{
+ border:0;border-radius:12px;
+ color:white;font-size:17px;font-weight:bold;
+ cursor:pointer;
+}
+.green{background:#12a85b}
+.red{background:#e63c50}
+.violet{background:#853fe0}
+.selected{outline:3px solid white}
+input{
+ width:90%;padding:16px;border:0;
+ border-radius:10px;font-size:17px;
+ margin:15px 0;
+}
+.confirm{
+ width:90%;padding:17px;
+ background:#ffc439;color:#171717;
+}
+.history{
+ margin:20px 15px;background:#202b45;
+ padding:15px;border-radius:12px;
+}
+.item{padding:10px;border-bottom:1px solid #444}
+#message{padding:15px;min-height:50px}
+</style>
+</head>
+<body>
+
+<header>🎮 HON-WIN</header>
+
+<div class="wallet">
+ YOUR COINS
+ <div class="coins">🪙 <span id="balance">1000</span></div>
+</div>
+
+<h3>ROUND TIMER</h3>
+<div class="timer" id="timer">30</div>
+
+<h3>SELECT YOUR COLOR</h3>
+
+<div class="colors">
+<button class="green" onclick="choose('GREEN',this)">GREEN</button>
+<button class="violet" onclick="choose('VIOLET',this)">VIOLET</button>
+<button class="red" onclick="choose('RED',this)">RED</button>
+</div>
+
+<input type="number" id="amount" placeholder="Enter Coins" min="1">
+
+<button class="confirm" id="confirm" onclick="confirmBet()">
+CONFIRM PREDICTION
+</button>
+
+<div id="message">Choose a color to play</div>
+
+<div class="history">
+<h3>📜 GAME HISTORY</h3>
+<div id="history">No History</div>
+</div>
+
+<script>
+let balance=1000;
+let selected="";
+let locked=false;
+let bet=0;
+let time=30;
+
+function choose(color,btn){
+ if(locked)return;
+ selected=color;
+ document.querySelectorAll(".colors button")
+ .forEach(b=>b.classList.remove("selected"));
+ btn.classList.add("selected");
+ document.getElementById("message").innerText=
+ "Selected Color: "+color;
+}
+
+function confirmBet(){
+ if(locked)return;
+ if(!selected){
+ alert("Please select color");
+ return;
+ }
+ let value=Number(document.getElementById("amount").value);
+ if(!Number.isSafeInteger(value)||value<=0||value>balance){
+ alert("Invalid coin amount");
+ return;
+ }
+ bet=value;
+ balance-=bet;
+ locked=true;
+ update();
+ document.getElementById("confirm").disabled=true;
+ document.getElementById("message").innerText=
+ "Prediction Confirmed!";
+}
+
+function update(){
+ document.getElementById("balance").innerText=balance;
+}
+
+function result(){
+ let colors=["GREEN","RED","VIOLET"];
+ let winner=colors[Math.floor(Math.random()*3)];
+ let status="NO BET";
+
+ if(locked){
+ if(selected===winner){
+ balance+=bet*2;
+ status="WIN 🎉";
+ }else{
+ status="LOSS";
+ }
+ }
+
+ update();
+ document.getElementById("message").innerText=
+ "RESULT: "+winner+" | "+status;
+
+ let history=document.getElementById("history");
+ if(history.innerText==="No History")history.innerHTML="";
+ let item=document.createElement("div");
+ item.className="item";
+ item.innerText="Color: "+winner+" | "+status;
+ history.prepend(item);
+
+ selected="";
+ bet=0;
+ locked=false;
+ document.getElementById("amount").value="";
+ document.getElementById("confirm").disabled=false;
+ document.querySelectorAll(".colors button")
+ .forEach(b=>b.classList.remove("selected"));
+}
+
+setInterval(()=>{
+ time--;
+ document.getElementById("timer").innerText=time;
+ if(time<=0){
+ result();
+ time=30;
+ }
+},1000);
+</script>
+
+</body>
+</html>
